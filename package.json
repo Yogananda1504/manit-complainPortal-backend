@@ -22,7 +22,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "ldapjs": "^3.0.7",
-    "mongoose": "^8.7.1",
+    "mongoose": "^8.7.2",
     "nodemon": "^3.1.7",
     "validator": "^13.12.0"
   }
