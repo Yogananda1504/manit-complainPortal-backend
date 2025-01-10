@@ -18,9 +18,10 @@ class LdapAuthenticator {
     constructor(baseDN) {
         this.baseDN = baseDN;
         this.client = ldap.createClient({
-            url: process.env.LDAP_URL || "ldaps://localhost:389",
+            url:  "ldap://172.31.171.59:389",
             tlsOptions: { rejectUnauthorized: false }
         });
+        console.log("\nThis is the client of the ldap : " , this.client);
     }
 
     /**

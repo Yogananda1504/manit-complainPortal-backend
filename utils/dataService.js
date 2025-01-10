@@ -33,9 +33,10 @@ class DataService {
      */
     async bindClient() {
         const client = ldap.createClient({
-            url: process.env.LDAP_URL || "ldaps://localhost:389",
+            url:  "ldap://172.31.171.59:389", //Used the Dynamic IP Address of the WSL instance as the LDAP is initialized in the WSL . Use the deployed version 
             tlsOptions: { rejectUnauthorized: false }
         });
+        
         const bindDn = process.env.LDAP_BIND_DN || "cn=admin,dc=dev,dc=com";
         const bindPassword = process.env.LDAP_BIND_PASSWORD || "yoga";
 
