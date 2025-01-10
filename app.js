@@ -58,6 +58,14 @@ app.get('/ping', (req, res) => {
     res.send('pong');
 });
 
+// Root Route
+app.get('/', (req, res) => {
+    res.status(200).json({
+        status: 'success',
+        message: 'Welcome to the Complaint Portal API'
+    });
+});
+
 // Routes
 app.use('/complain', complainRoutes);
 app.use('/profile', profileRoutes);
