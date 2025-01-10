@@ -39,18 +39,6 @@ const app = express();
 
 // Apply security and parsing middlewares early
 app.use(helmet());
-// app.use(helmet.contentSecurityPolicy({
-//     directives:{
-//         defaultSrc: [" 'self' "],
-//         scriptSrc: ["'self'", "https://apis.google.com"],
-//         styleSrc: ["'self'", "https://fonts.googleapis.com"],
-//         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-//         imgSrc: ["'self'", "data:"],
-//         connectSrc: ["'self'", "https://apis.google.com"],
-//         frameSrc: ["'self'", "https://accounts.google.com"],
-        
-//     }
-// }))
 app.use(morgan('dev'));
 app.use(corsConfig);
 app.use(express.json());
