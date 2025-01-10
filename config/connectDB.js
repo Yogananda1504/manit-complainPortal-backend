@@ -5,6 +5,8 @@
  */
 
 import mongoose from "mongoose";
+import { EventEmitter } from "events"; 
+EventEmitter.defaultMaxListeners = 20;
 
 mongoose.set('strictQuery', false);
 import dotenv from 'dotenv';
@@ -22,6 +24,7 @@ dotenv.config();
 const connectToDB = async () => {
     try {
         const client = await mongoose.connect(process.env.MONGO_URI);
+        mongoose.connection.setMaxListeners(15);
 
         if (client) {
             console.log("Connected to DB: ", client.connection.host);
