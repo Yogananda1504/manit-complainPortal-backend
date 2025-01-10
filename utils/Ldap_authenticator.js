@@ -17,6 +17,10 @@ class LdapAuthenticator {
      */
     constructor(baseDN) {
         this.baseDN = baseDN;
+        this.client = ldap.createClient({
+            url: process.env.LDAP_URL || "ldaps://localhost:389",
+            tlsOptions: { rejectUnauthorized: false }
+        });
     }
 
     /**
@@ -26,24 +30,19 @@ class LdapAuthenticator {
      * @returns {Promise<boolean>} - A promise that resolves to true if authentication is successful, otherwise false.
      */
     async authenticate(username, password) {
-        const client = ldap.createClient({
-            url: process.env.LDAP_URL || "ldaps://localhost:389",
-            tlsOptions: { rejectUnauthorized: false } // Only use this if your LDAP uses a self-signed cert in dev
-        });
-
         // Construct user DN dynamically
         const userDN = `uid=${username},ou=Students,${this.baseDN}`;
 
         return new Promise((resolve, reject) => {
-            client.bind(userDN, password , (err) => {
+            this.client.bind(userDN, password , (err) => {
                 if (err) {
                     console.error("Bind error:", err.message);
-                    client.unbind(); // Always unbind to clean up
+                    this.client.unbind(); // Always unbind to clean up
                     return resolve(false); // Authentication failed
                 }
 
                 console.log("Authentication successful");
-                client.unbind(); // Unbind after authentication
+                this.client.unbind(); // Unbind after authentication
                 return resolve(true); // Authentication successful
             });
         });

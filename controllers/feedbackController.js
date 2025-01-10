@@ -1,9 +1,7 @@
 import transporter from "../utils/transporter.js";
 
-export const feedbackController = async(req, res) => {
-    const { name, scholarNumber, stream, year, department, description } = req.body;
-    
-    const template = `
+export function buildFeedbackTemplate({ scholarNumber, name, stream, year, department, description }) {
+    return `
         <html>
             <head>
                 <style>
@@ -43,6 +41,12 @@ export const feedbackController = async(req, res) => {
             </body>
         </html>
     `;
+}
+
+export const feedbackController = async(req, res) => {
+    const { name, scholarNumber, stream, year, department, description } = req.body;
+    
+    const template = buildFeedbackTemplate({ scholarNumber, name, stream, year, department, description });
 
     const attachments = req.files.map(file => ({
         filename: file.filename,

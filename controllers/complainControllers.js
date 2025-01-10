@@ -70,8 +70,6 @@ export const registerComplain = async (req, res, next) => {
  */
 export const getComplaints = async (req, res, next) => {
     try {
-
-		console.log("Request params:", req.params);
         if (req.params.type === "Hostel") {
 			await getComplaintsHostel(req, res, next);
 		} else if (req.params.type === "Academic") {
@@ -187,7 +185,6 @@ export const deleteComplaints = async (req, res, next) => {
 			return next(new appError("Development phase ", 400));
 		}
 	} catch (error) {
-		console.log(error);
 		next(new appError("Internal server error!", 500));
 	}
 };

@@ -114,10 +114,7 @@ const getAdministrationComplaints = async (req, res, next) => {
 const getAdministrationComplaintsByDate = async (req, res, next) => {
 	try {
 		const scholarNumber = validator.escape(req.sn);
-		console.log("Query ", req.query);
 		const { startDate, endDate } = req.query;
-		console.log("Start date:", startDate);
-		console.log("End date:", endDate);
 		const { complaintType, status, readStatus } = req.query;
 		let complaintIds = req.query.complaintIds || [];
 		
@@ -157,7 +154,6 @@ const getAdministrationComplaintsByDate = async (req, res, next) => {
 		}
 
 		const complaints = await Complaints.find(filter);
-		console.log("Complaints", complaints);
 		if (!complaints || complaints.length === 0) {
 			return res.status(404).json({ message: "No complaints found." });
 		}
@@ -172,7 +168,6 @@ const getAdministrationComplaintsByDate = async (req, res, next) => {
 			})),
 			category: "Administration",
 		}));
-		console.log("Complaints with urls", complaintsWithUrls);
 		res.status(200).json({ complaints: complaintsWithUrls });
 	} catch (error) {
 		next(error);

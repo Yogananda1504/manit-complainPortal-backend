@@ -153,14 +153,21 @@ class DataService {
     }
 
     /**
+     * Ensure MongoDB connection.
+     */
+    async ensureMongoConnected() {
+        if (mongoose.connection.readyState !== 1) {
+            await mongoose.connect(process.env.MONGO_URI );
+        }
+    }
+
+    /**
      * Get complaint details of a user by scholar number.
      * @param {string} scholarNumber - The scholar number to get complaint details for.
      * @returns {Promise<Object>} - A promise that resolves to the complaint details.
      */
     async getComplaintDetails(scholarNumber) {
-        if (mongoose.connection.readyState !== 1) {
-            await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/test");
-        }
+        await this.ensureMongoConnected();
         try {
            const [
             hostelComplaints,

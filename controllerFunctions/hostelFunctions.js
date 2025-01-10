@@ -138,10 +138,7 @@ const getComplaintsHostel = async (req, res, next) => {
 const getComplaintsByDate = async (req, res, next) => {
 	try {
 		const scholarNumber = validator.escape(req.sn);
-		console.log("Query ", req.query);
 		const { startDate, endDate } = req.query;
-		console.log("Start date:", startDate);
-		console.log("End date:", endDate);
 		const { complaintType, status, readStatus } = req.query;
 		let complaintIds = req.query.complaintIds || [];
 		
@@ -181,7 +178,6 @@ const getComplaintsByDate = async (req, res, next) => {
 		}
 
 		const complaints = await Complaints.find(filter);
-		console.log("Complaints", complaints);
 		if (!complaints || complaints.length === 0) {
 			return res.status(404).json({ message: "No complaints found." });
 		}
@@ -196,7 +192,6 @@ const getComplaintsByDate = async (req, res, next) => {
 			})),
 			category: "Hostel",
 		}));
-		console.log("Complaints with urls", complaintsWithUrls);
 		res.status(200).json({ complaints: complaintsWithUrls });
 	} catch (error) {
 		next(error);
@@ -221,8 +216,6 @@ const getComplaintsByDate = async (req, res, next) => {
 const updateComplaintHostel = async (req, res, next) => {
 	try {
 		const { complainId, updates } = req.body;
-		console.log(req.body);
-		console.log("Updates:", updates);
 
 		if (!updates) {
 			return next(new appError("Please provide updates!", 400));
@@ -270,7 +263,6 @@ const updateComplaintHostel = async (req, res, next) => {
 const deleteComplaintHostel = async (req, res, next) => {
 	try {
 		const { complainId } = req.query;
-		console.log("Deleting the complaint : ", complainId);
 		if (!complainId) {
 			return next(new appError("Complain ID is required!", 400));
 		}

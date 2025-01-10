@@ -50,7 +50,6 @@ const dataServiceInstance = new DataService();
  */
 const authController = async (req, res, next) => {
 	try {
-		console.log("Request body:", req.body);
 		const { username, password } = req.body;
 
 		if (!username || !password) {
@@ -68,7 +67,6 @@ const authController = async (req, res, next) => {
 			// Fetch user details and send response in parallel
 			const userPromise = dataServiceInstance.getGenericDetails(username);
             const [user] = await Promise.all([userPromise]);
-			console.log("User data :", user);
             // Create the JWT token for the user
 			const token = generateToken({ username, email: user.email });
 			// Set the token as a secure, HTTP-only cookie
@@ -85,7 +83,6 @@ const authController = async (req, res, next) => {
 			});
 		}
 	} catch (err) {
-		console.log(err);
 		return next(new appError("Error in authenticating user", 500));
 	}
 };

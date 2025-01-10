@@ -23,7 +23,6 @@ const getProfileDetails = async (req, res, next) => {
 			const complaintStats = await dataServiceInstance.getComplaintDetails(
 				scholarNumber
 			);
-			console.log(complaintStats);
 			if (!complaintStats) {
 				return next(new appError("User not found!", 404));
 			}

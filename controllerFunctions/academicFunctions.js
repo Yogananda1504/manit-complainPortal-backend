@@ -28,7 +28,6 @@ import mongoose from "mongoose";
  */
 const registerComplaintAcademic = async (req, res, next) => {
 	try {
-		console.log("Academic Complaint : \n", req.body);
 		const {
 			complainType,
 			complainDescription,
@@ -141,10 +140,7 @@ const getComplaintsAcademic = async (req, res, next) => {
 const getAcademicComplaintsByDate = async (req, res, next) => {
 	try {
 		const scholarNumber = validator.escape(req.sn);
-		console.log("Query ", req.query);
 		const { startDate, endDate } = req.query;
-		console.log("Start date:", startDate);
-		console.log("End date:", endDate);
 		const { complaintType, status, readStatus } = req.query;
 		let complaintIds = req.query.complaintIds || [];
 		
@@ -184,7 +180,6 @@ const getAcademicComplaintsByDate = async (req, res, next) => {
 		}
 
 		const complaints = await Complaints.find(filter);
-		console.log("Complaints", complaints);
 		if (!complaints || complaints.length === 0) {
 			return res.status(404).json({ message: "No complaints found." });
 		}
@@ -199,7 +194,6 @@ const getAcademicComplaintsByDate = async (req, res, next) => {
 			})),
 			category: "Academic",
 		}));
-		console.log("Complaints with urls", complaintsWithUrls);
 		res.status(200).json({ complaints: complaintsWithUrls });
 	} catch (error) {
 		next(error);
