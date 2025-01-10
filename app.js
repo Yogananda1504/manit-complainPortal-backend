@@ -29,7 +29,7 @@ dotenv.config();
  * CORS Configuration
  */
 const corsConfig = cors({
-    origin: '*',
+    origin: 'https://s9x3g1x0-5173.inc1.devtunnels.ms',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization','csrf-token']
