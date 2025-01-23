@@ -27,7 +27,6 @@ const HostelComplaintSchema = new Schema({
     scholarNumber: {
         type: String, 
         required: [true, "Student ID is required!"],
-        index: true,
     },
     studentName: {
         type: String,
