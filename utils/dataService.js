@@ -33,7 +33,7 @@ class DataService {
      */
     async bindClient() {
         const client = ldap.createClient({
-            url:  "ldap://172.31.171.59:389", //Used the Dynamic IP Address of the WSL instance as the LDAP is initialized in the WSL . Use the deployed version 
+            url:  "ldap://localhost:389", //Used the Dynamic IP Address of the WSL instance as the LDAP is initialized in the WSL . Use the deployed version 
             tlsOptions: { rejectUnauthorized: false }
         });
         

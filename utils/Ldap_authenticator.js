@@ -17,11 +17,17 @@ class LdapAuthenticator {
      */
     constructor(baseDN) {
         this.baseDN = baseDN;
-        this.client = ldap.createClient({
-            url:  "ldap://172.31.171.59:389",
+    }
+
+    /**
+     * Create a new LDAP client.
+     * @returns {ldap.Client} - The LDAP client.
+     */
+    createClient() {
+        return ldap.createClient({
+            url: "ldap://localhost:389",
             tlsOptions: { rejectUnauthorized: false }
         });
-        console.log("\nThis is the client of the ldap : " , this.client);
     }
 
     /**
@@ -31,19 +37,20 @@ class LdapAuthenticator {
      * @returns {Promise<boolean>} - A promise that resolves to true if authentication is successful, otherwise false.
      */
     async authenticate(username, password) {
+        const client = this.createClient();
         // Construct user DN dynamically
         const userDN = `uid=${username},ou=Students,${this.baseDN}`;
 
         return new Promise((resolve, reject) => {
-            this.client.bind(userDN, password , (err) => {
+            client.bind(userDN, password , (err) => {
                 if (err) {
                     console.error("Bind error:", err.message);
-                    this.client.unbind(); // Always unbind to clean up
+                    client.unbind(); // Always unbind to clean up
                     return resolve(false); // Authentication failed
                 }
 
                 console.log("Authentication successful");
-                this.client.unbind(); // Unbind after authentication
+                client.unbind(); // Unbind after authentication
                 return resolve(true); // Authentication successful
             });
         });
