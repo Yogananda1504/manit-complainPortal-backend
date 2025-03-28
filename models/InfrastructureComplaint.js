@@ -9,7 +9,7 @@ import { model, Schema } from 'mongoose';
  * @module models/InfrastructureComplaint
  */
 
-/**
+/** 
  * InfrastructureComplaint Schema
  * @typedef {Object} InfrastructureComplaint
  * @property {string} scholarNumber - Student ID

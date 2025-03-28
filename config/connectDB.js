@@ -24,7 +24,7 @@ dotenv.config();
 const connectToDB = async () => {
     try {
      
-        const client = await mongoose.connect(process.env.MONGO_URI);
+        const client = await mongoose.connect("mongodb+srv://bablu151104:7671050452%40My@vynr1504.2u0mx.mongodb.net/?retryWrites=true&w=majority&appName=vynr1504");
 
         if (client) {
             console.log("Connected to DB: ", client.connection.host);

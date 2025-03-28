@@ -72,7 +72,7 @@ const registerComplaintHostel = async (req, res, next) => {
 			useremail,
 		});
 
-		res.status(201).json({
+		res.status(200).json({
 			success: true,
 			message: "Complaint registered successfully!",
 		});

@@ -13,110 +13,128 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Validate required environment variables
+if (
+	!process.env.REDIS_HOST ||
+	!process.env.REDIS_PORT ||
+	!process.env.EMAIL_USER
+) {
+	logger.error(
+		"Missing required environment variables for Redis or Email configuration."
+	);
+	process.exit(1); // Exit if configuration is incomplete
+}
+
 // Enhanced configuration with improved styling options
 const CONFIG = {
-    mimeTypes: {
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".png": "image/png",
-        ".pdf": "application/pdf",
-        ".doc": "application/msword",
-        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ".xls": "application/vnd.ms-excel",
-        ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        ".txt": "text/plain",
-        ".zip": "application/zip",
-    },
-    colors: {
-        primary: "#1e40af", // Deeper blue
-        secondary: "#dc2626", // Vibrant red
-        success: "#15803d", // Rich green
-        warning: "#f59e0b", // Warm amber
-        text: "#1f2937", // Dark gray
-        lightText: "#6b7280", // Medium gray
-        border: "#e5e7eb", // Light gray
-        background: "#f8fafc", // Very light blue-gray
-        cardBg: "#ffffff",
-        gradientStart: "#1e40af",
-        gradientEnd: "#3b82f6",
-    },
-    fonts: {
-        primary: "'Segoe UI', system-ui, sans-serif",
-        heading: "'Arial', 'Helvetica Neue', sans-serif",
-    },
-    spacing: {
-        xs: "8px",
-        sm: "12px",
-        md: "16px",
-        lg: "24px",
-        xl: "32px",
-    }
+	mimeTypes: {
+		".jpg": "image/jpeg",
+		".jpeg": "image/jpeg",
+		".png": "image/png",
+		".pdf": "application/pdf",
+		".doc": "application/msword",
+		".docx":
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		".xls": "application/vnd.ms-excel",
+		".xlsx":
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		".txt": "text/plain",
+		".zip": "application/zip",
+	},
+	colors: {
+		primary: "#1e40af", // Deeper blue
+		secondary: "#dc2626", // Vibrant red
+		success: "#15803d", // Rich green
+		warning: "#f59e0b", // Warm amber
+		text: "#1f2937", // Dark gray
+		lightText: "#6b7280", // Medium gray
+		border: "#e5e7eb", // Light gray
+		background: "#f8fafc", // Very light blue-gray
+		cardBg: "#ffffff",
+		gradientStart: "#1e40af",
+		gradientEnd: "#3b82f6",
+	},
+	fonts: {
+		primary: "'Segoe UI', system-ui, sans-serif",
+		heading: "'Arial', 'Helvetica Neue', sans-serif",
+	},
+	spacing: {
+		xs: "8px",
+		sm: "12px",
+		md: "16px",
+		lg: "24px",
+		xl: "32px",
+	},
 };
 
 // Initialize email queue with retry logic
 const emailQueue = new Queue("emailQueue", {
-    redis: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD,
-    },
-    defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-            type: 'exponential',
-            delay: 2000
-        }
-    }
+	redis: {
+		host: process.env.REDIS_HOST,
+		port: process.env.REDIS_PORT,
+		password: process.env.REDIS_PASSWORD,
+		maxRetriesPerRequest: null, // added to disable retry limit
+	},
+	defaultJobOptions: {
+		attempts: 3,
+		backoff: {
+			type: "exponential",
+			delay: 2000,
+		},
+	},
 });
 
 const processAttachment = async (filePath) => {
-    if (!filePath || typeof filePath !== 'string') {
-        logger.warn(`Invalid attachment path: ${JSON.stringify(filePath)}`);
-        return null;
-    }
+	if (!filePath || typeof filePath !== "string") {
+		logger.warn(`Invalid attachment path: ${JSON.stringify(filePath)}`);
+		return null;
+	}
 
-    try {
-        const absolutePath = path.isAbsolute(filePath)
-            ? path.normalize(filePath)
-            : path.join(__dirname, '..', path.normalize(filePath));
+	try {
+		const absolutePath = path.isAbsolute(filePath)
+			? path.normalize(filePath)
+			: path.join(__dirname, "..", path.normalize(filePath));
 
-        if (!fs.existsSync(absolutePath)) {
-            logger.warn(`File not found: ${absolutePath}`);
-            return null;
-        }
+		// Use asynchronous check for file existence
+		try {
+			await fs.promises.access(absolutePath, fs.constants.F_OK);
+		} catch {
+			logger.warn(`File not found: ${absolutePath}`);
+			return null;
+		}
 
-        const fileContent = await fs.promises.readFile(absolutePath);
-        const ext = path.extname(absolutePath).toLowerCase();
-       
-        return {
-            filename: path.basename(absolutePath),
-            content: fileContent.toString("base64"),
-            encoding: "base64",
-            contentType: CONFIG.mimeTypes[ext] || "application/octet-stream"
-        };
-    } catch (error) {
-        logger.error(`Attachment processing error: ${filePath}`, error);
-        return null;
-    }
+		const fileContent = await fs.promises.readFile(absolutePath);
+		const ext = path.extname(absolutePath).toLowerCase();
+
+		return {
+			filename: path.basename(absolutePath),
+			content: fileContent.toString("base64"),
+			encoding: "base64",
+			contentType: CONFIG.mimeTypes[ext] || "application/octet-stream",
+		};
+	} catch (error) {
+		logger.error(`Attachment processing error: ${filePath}`, error);
+		return null;
+	}
 };
 
 // Enhanced email content generation with modern UI
 const generateEmailContent = (complaint, category, submittedDate) => {
-    const details = [
-        ['Scholar Number', complaint.scholarNumber],
-        ['Student Name', complaint.studentName],
-        ['Stream', complaint.stream],
-        ['Year', complaint.year],
-        ['Department', complaint.department],
-        ['Hostel', complaint.hostelNumber],
-        ['Room', complaint.room],
-        ['Landmark', complaint.landmark],
-        ['Complaint Type', complaint.complainType],
-        ['Category', category],
-        ['Submitted On', submittedDate]
-    ].filter(([_, value]) => value);
+	const details = [
+		["Scholar Number", complaint.scholarNumber],
+		["Student Name", complaint.studentName],
+		["Stream", complaint.stream],
+		["Year", complaint.year],
+		["Department", complaint.department],
+		["Hostel", complaint.hostelNumber],
+		["Room", complaint.room],
+		["Landmark", complaint.landmark],
+		["Complaint Type", complaint.complainType],
+		["Category", category],
+		["Submitted On", submittedDate],
+	].filter(([_, value]) => value);
 
-    const baseTemplate = `
+	const baseTemplate = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -142,7 +160,9 @@ const generateEmailContent = (complaint, category, submittedDate) => {
         ">
             <!-- Modern Header with Gradient -->
             <header style="
-                background: linear-gradient(135deg, ${CONFIG.colors.gradientStart} 0%, ${CONFIG.colors.gradientEnd} 100%);
+                background: linear-gradient(135deg, ${
+									CONFIG.colors.gradientStart
+								} 0%, ${CONFIG.colors.gradientEnd} 100%);
                 padding: ${CONFIG.spacing.xl};
                 text-align: center;
                 position: relative;
@@ -190,7 +210,9 @@ const generateEmailContent = (complaint, category, submittedDate) => {
 
             <!-- Modern Footer -->
             <footer style="
-                background: linear-gradient(135deg, ${CONFIG.colors.gradientStart} 0%, ${CONFIG.colors.gradientEnd} 100%);
+                background: linear-gradient(135deg, ${
+									CONFIG.colors.gradientStart
+								} 0%, ${CONFIG.colors.gradientEnd} 100%);
                 padding: ${CONFIG.spacing.xl};
                 text-align: center;
                 color: white;
@@ -222,11 +244,13 @@ const generateEmailContent = (complaint, category, submittedDate) => {
     </html>
     `;
 
-    const content = `
+	const content = `
         <div>
             <!-- Status Card -->
             <div style="
-                background: linear-gradient(to right, ${CONFIG.colors.success}, #16a34a);
+                background: linear-gradient(to right, ${
+									CONFIG.colors.success
+								}, #16a34a);
                 border-radius: 12px;
                 padding: ${CONFIG.spacing.lg};
                 margin-bottom: ${CONFIG.spacing.xl};
@@ -254,7 +278,9 @@ const generateEmailContent = (complaint, category, submittedDate) => {
                     font-size: 16px;
                     opacity: 0.9;
                 ">
-                    Complaint UID: <strong>${getCategoryTag(category)}${complaint._id}</strong>
+                    Complaint UID: <strong>${getCategoryTag(category)}${
+		complaint._id
+	}</strong>
                 </p>
             </div>
             
@@ -303,7 +329,9 @@ const generateEmailContent = (complaint, category, submittedDate) => {
                         margin-bottom: ${CONFIG.spacing.lg};
                     ">
                         <tbody>
-                            ${details.map(([key, value]) => `
+                            ${details
+															.map(
+																([key, value]) => `
                                 <tr>
                                     <td style="
                                         padding: ${CONFIG.spacing.sm};
@@ -317,7 +345,9 @@ const generateEmailContent = (complaint, category, submittedDate) => {
                                         border-bottom: 1px solid ${CONFIG.colors.border};
                                     ">${value}</td>
                                 </tr>
-                            `).join('')}
+                            `
+															)
+															.join("")}
                         </tbody>
                     </table>
 
@@ -362,17 +392,21 @@ const generateEmailContent = (complaint, category, submittedDate) => {
                     padding-left: 20px;
                     color: #9a3412;
                 ">
-                    <li style="margin-bottom: ${CONFIG.spacing.xs}">Your complaint will be reviewed by the concerned department</li>
-                    <li style="margin-bottom: ${CONFIG.spacing.xs}">You will receive updates on the status of your complaint</li>
+                    <li style="margin-bottom: ${
+											CONFIG.spacing.xs
+										}">Your complaint will be reviewed by the concerned department</li>
+                    <li style="margin-bottom: ${
+											CONFIG.spacing.xs
+										}">You will receive updates on the status of your complaint</li>
                     <li>For urgent matters, please contact the department directly</li>
                 </ul>
             </div>
         </div>
     `;
 
-    return {
-        html: baseTemplate.replace("{{content}}", content),
-        text: `
+	return {
+		html: baseTemplate.replace("{{content}}", content),
+		text: `
 MANIT Complaint Management System
 
 Dear ${complaint.studentName},
@@ -381,7 +415,7 @@ Your complaint has been successfully submitted.
 Complaint ID: #${complaint._id}
 
 Complaint Details:
-${details.map(([key, value]) => `${key}: ${value}`).join('\n')}
+${details.map(([key, value]) => `${key}: ${value}`).join("\n")}
 
 Description:
 ${complaint.complainDescription}
@@ -396,72 +430,90 @@ Thank you for using the MANIT Complaint Portal.
 MANIT Bhopal
 Link Road Number 3, Near Kali Mata Mandir
 Bhopal, Madhya Pradesh 462003
-        `
-    };
+        `,
+	};
 };
 
-// Email processor with enhanced error handling
+// Email processor with enhanced error handling and input validation
 const processor = async (job) => {
-    const { email, subject, html, text, attachments } = job.data;
-    
-    try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject,
-            html,
-            text,
-            attachments: attachments || []
-        });
-        logger.info(`Email sent successfully to ${email}`);
-    } catch (error) {
-        logger.error(`Email sending failed to ${email}:`, error);
-        throw new Error(`Email sending failed: ${error.message}`);
-    }
+	const { email, subject, html, text, attachments } = job.data;
+
+	// Validate essential email elements
+	if (!email || !subject || !html || !text) {
+		const errMsg = "Missing required email fields in job data.";
+		logger.error(errMsg, job.data);
+		throw new Error(errMsg);
+	}
+
+	try {
+		await transporter.sendMail({
+			from: process.env.EMAIL_USER,
+			to: email,
+			subject,
+			html,
+			text,
+			attachments: attachments || [],
+		});
+		console.log("Email sent successfully\n");
+		logger.info(`Email sent successfully to ${email}`);
+	} catch (error) {
+		logger.error(`Email sending failed to ${email}:`, error);
+		throw new Error(`Email sending failed: ${error.message}`);
+	}
 };
 
 emailQueue.process(processor);
 
 // Main email automation function
 export const automateEmail = async (data) => {
-    const { category, complaint } = data;
-    if (!complaint) throw new Error("Complaint data is required");
+	const { category, complaint } = data;
+	console.log("Automating the email into the job queue \n");
+	if (!complaint) throw new Error("Complaint data is required");
 
-    try {
-        const processedAttachments = complaint.attachments?.length
-            ? (await Promise.all(complaint.attachments.map(processAttachment))).filter(Boolean)
-            : [];
+	try {
+		const processedAttachments = complaint.attachments?.length
+			? (
+					await Promise.all(complaint.attachments.map(processAttachment))
+			  ).filter(Boolean)
+			: [];
 
-        const submittedDate = new Date(complaint.createdAt).toLocaleString("en-IN", {
-            dateStyle: "long",
-            timeStyle: "short"
-        });
+		const submittedDate = new Date(complaint.createdAt).toLocaleString(
+			"en-IN",
+			{
+				dateStyle: "long",
+				timeStyle: "short",
+			}
+		);
 
-        const { html, text } = generateEmailContent(complaint, category, submittedDate);
+		const { html, text } = generateEmailContent(
+			complaint,
+			category,
+			submittedDate
+		);
 
-        await emailQueue.add({
-            email: complaint.useremail,
-            subject: `[MANIT Complaints] New ${category} Complaint #${complaint._id} Submitted`,
-            html,
-            text,
-            attachments: processedAttachments
-        });
+		await emailQueue.add({
+			email: complaint.useremail,
+			subject: `[MANIT Complaints] New ${category} Complaint #${complaint._id} Submitted`,
+			html,
+			text,
+			attachments: processedAttachments,
+		});
 
-        logger.info(`Email queued for complaint ${complaint._id}`);
-    } catch (error) {
-        logger.error("Email automation failed:", error);
-        throw error;
-    }
+		logger.info(`Email queued for complaint ${complaint._id}`);
+	} catch (error) {
+		logger.error("Email automation failed:", error);
+		throw error;
+	}
 };
 
 const getCategoryTag = (category) => {
-    const map = {
-        'academic': 'A',
-        'administration': 'B',
-        'hostel': 'C',
-        'infrastructure': 'D',
-        'medical': 'E',
-        'ragging': 'F'
-    };
-    return map[category.toLowerCase()] || '';
+	const map = {
+		academic: "A",
+		administration: "B",
+		hostel: "C",
+		infrastructure: "D",
+		medical: "E",
+		ragging: "F",
+	};
+	return map[category.toLowerCase()] || "";
 };

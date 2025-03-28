@@ -40,7 +40,7 @@ const HostelComplaintSchema = new Schema({
     complainType: {
         type: String,
         trim: true,
-        enum: ["Maintenance", "Hygiene", "Security", "Mess", "Bathroom", "Room", "Noise", "Other"],
+        enum: ["Maintenance", "Hygiene", "Security", "Mess", "Bathroom", "Room", "Noise","Internet", "Other"],
         required: [true, "Complaint type is required!"]
     },
     complainDescription: {

@@ -190,6 +190,7 @@ const getInfrastructureComplaintsByDate = async (req, res, next) => {
 			})),
 			category: "Infrastructure",
 		}));
+		console.log(complaintsWithUrls);
 		res.status(200).json({ complaints: complaintsWithUrls });
 	} catch (error) {
 		next(error);

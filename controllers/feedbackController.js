@@ -5,12 +5,68 @@ export function buildFeedbackTemplate({ scholarNumber, name, stream, year, depar
         <html>
             <head>
                 <style>
-                    body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
-                    .container { background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                    .header { text-align: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; }
-                    .section { margin-bottom: 15px; }
-                    .label { font-weight: bold; color: #333333; }
-                    .content { margin-left: 10px; color: #555555; }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background-color: #f4f7fc;
+                        padding: 40px;
+                        margin: 0;
+                    }
+                    .container {
+                        background-color: #ffffff;
+                        padding: 30px;
+                        border-radius: 10px;
+                        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    .header {
+                        text-align: center;
+                        border-bottom: 2px solid #eee;
+                        padding-bottom: 20px;
+                        margin-bottom: 30px;
+                    }
+                    .header h2 {
+                        font-size: 28px;
+                        color: #333;
+                        margin: 0;
+                    }
+                    .section {
+                        margin-bottom: 20px;
+                    }
+                    .label {
+                        font-weight: bold;
+                        color: #2e3a59;
+                        font-size: 16px;
+                    }
+                    .content {
+                        color: #555;
+                        font-size: 16px;
+                        padding-left: 10px;
+                        word-wrap: break-word;
+                    }
+                    .content p {
+                        line-height: 1.5;
+                    }
+                    .footer {
+                        margin-top: 30px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #777;
+                    }
+                    .footer a {
+                        color: #007bff;
+                        text-decoration: none;
+                    }
+                    .footer a:hover {
+                        text-decoration: underline;
+                    }
+                    .section-item {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .section-item > span {
+                        margin-bottom: 8px;
+                    }
                 </style>
             </head>
             <body>
@@ -18,30 +74,39 @@ export function buildFeedbackTemplate({ scholarNumber, name, stream, year, depar
                     <div class="header">
                         <h2>Feedback Submission</h2>
                     </div>
-                    <div class="section">
-                        <span class="label">Scholar Number:</span><span class="content">${scholarNumber}</span>
+                    <div class="section section-item">
+                        <span class="label">Scholar Number:</span>
+                        <span class="content">${scholarNumber}</span>
                     </div>
-                    <div class="section">
-                        <span class="label">Name:</span><span class="content">${name}</span>
+                    <div class="section section-item">
+                        <span class="label">Name:</span>
+                        <span class="content">${name}</span>
                     </div>
-                    <div class="section">
-                        <span class="label">Stream:</span><span class="content">${stream}</span>
+                    <div class="section section-item">
+                        <span class="label">Stream:</span>
+                        <span class="content">${stream}</span>
                     </div>
-                    <div class="section">
-                        <span class="label">Year:</span><span class="content">${year}</span>
+                    <div class="section section-item">
+                        <span class="label">Year:</span>
+                        <span class="content">${year}</span>
                     </div>
-                    <div class="section">
-                        <span class="label">Department:</span><span class="content">${department}</span>
+                    <div class="section section-item">
+                        <span class="label">Department:</span>
+                        <span class="content">${department}</span>
                     </div>
                     <div class="section">
                         <span class="label">Description:</span>
                         <p class="content">${description}</p>
+                    </div>
+                    <div class="footer">
+                        <p>If you have any questions, feel free to <a href="mailto:support@example.com">contact us</a>.</p>
                     </div>
                 </div>
             </body>
         </html>
     `;
 }
+
 
 export const feedbackController = async(req, res) => {
     const { name, scholarNumber, stream, year, department, description } = req.body;
@@ -62,4 +127,5 @@ export const feedbackController = async(req, res) => {
         html: template,
         attachments
     });
+    return res.status(200).json({status:200});
 }

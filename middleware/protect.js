@@ -15,6 +15,7 @@ dotenv.config();
  * @param {Object} res - Response object.
  * @param {Function} next - Next middleware function.
  */
+
 const protect = async (req, res, next) => {
 	try {
 		// Extract the token from the request cookies

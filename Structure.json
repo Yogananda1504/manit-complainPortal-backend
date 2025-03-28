@@ -1,0 +1,28 @@
+
+    {"Department":"Computer Science",
+    "Code":"CSE",
+    },
+    
+    {"Department":"Electronics & Communication ",
+    "Code":"ECE"
+    },
+    
+    {"Department":"Electrical Engineering",
+    "Code":"EE",
+    },
+    
+    // {"Department":"Civil Engineering",
+    // "Code":"CE",
+    // },
+    {"Department":"Chemical Engineering",
+    "Code":"CHEM",
+    },
+    {"Department":"Materials & Metallurgical Engineering",
+    "Code":"MME",
+    },
+    {
+     
+    }
+
+
+    
